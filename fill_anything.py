@@ -124,7 +124,7 @@ if __name__ == "__main__":
     if latest_coords is None and args.mask_img:
         # if no coordinates provided and if mask image is provided,
         # use the mask image directly and skip SAM predictions
-        masks = [load_img_to_array(args.mask_img)]
+        masks = np.asarray([load_img_to_array(args.mask_img)])
     else:
         masks, _, _ = predict_masks_with_sam(
             img,
