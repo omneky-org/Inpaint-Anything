@@ -80,7 +80,7 @@ def setup_args(parser):
     parser.add_argument(
         "--sam_ckpt",
         type=str,
-        required=True,
+        required=False,
         help="The path to the SAM checkpoint to use for mask generation.",
     )
     parser.add_argument(
@@ -122,6 +122,8 @@ if __name__ == "__main__":
     img = load_img_to_array(args.input_img)
 
     if latest_coords is None and args.mask_img:
+        # if no coordinates provided and if mask image is provided,
+        # use the mask image directly and skip SAM predictions
         masks = [load_img_to_array(args.mask_img)]
     else:
         masks, _, _ = predict_masks_with_sam(
@@ -132,6 +134,8 @@ if __name__ == "__main__":
             ckpt_p=args.sam_ckpt,
             device=device,
         )
+
+    # convert masks to binary
     masks = masks.astype(np.uint8) * 255
 
     # dilate mask to avoid unmasked edge effect
