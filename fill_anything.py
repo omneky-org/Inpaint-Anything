@@ -11,6 +11,7 @@ from utils import (
     dilate_mask,
     get_clicked_point,
     load_img_to_array,
+    load_mask_to_array,
     save_array_to_img,
     show_mask,
     show_points,
@@ -124,7 +125,7 @@ if __name__ == "__main__":
     if latest_coords is None and args.mask_img:
         # if no coordinates provided and if mask image is provided,
         # use the mask image directly and skip SAM predictions
-        masks = np.asarray([load_img_to_array(args.mask_img)])
+        masks = np.asarray([load_mask_to_array(args.mask_img)])
     else:
         masks, _, _ = predict_masks_with_sam(
             img,
@@ -135,8 +136,8 @@ if __name__ == "__main__":
             device=device,
         )
 
-    # convert masks to binary
-    masks = masks.astype(np.uint8) * 255
+        # convert masks to binary
+        masks = masks.astype(np.uint8) * 255
 
     # dilate mask to avoid unmasked edge effect
     if args.dilate_kernel_size is not None:
@@ -161,10 +162,12 @@ if __name__ == "__main__":
         plt.figure(figsize=(width / dpi / 0.77, height / dpi / 0.77))
         plt.imshow(img)
         plt.axis("off")
-        show_points(
-            plt.gca(), [latest_coords], args.point_labels, size=(width * 0.04) ** 2
-        )
-        plt.savefig(img_points_p, bbox_inches="tight", pad_inches=0)
+        if latest_coords is not None:
+            show_points(
+                plt.gca(), [latest_coords], args.point_labels, size=(width * 0.04) ** 2
+            )
+            plt.savefig(img_points_p, bbox_inches="tight", pad_inches=0)
+
         show_mask(plt.gca(), mask, random_color=False)
         plt.savefig(img_mask_p, bbox_inches="tight", pad_inches=0)
         plt.close()
